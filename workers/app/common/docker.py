@@ -331,7 +331,11 @@ def start_task_worker(docker_client, task, webapi_uri, username, workdir, worker
 
     logger.debug(f"getting image {TASK_WORKER_IMAGE}")
     # task worker is always pulled to ensure we can update our code
-    docker_image = pull_image(docker_client, TASK_WORKER_IMAGE)
+    if ":" not in TASK_WORKER_IMAGE:
+        # consider missing :tag info as a local image for tests
+        docker_image = get_image(docker_client, TASK_WORKER_IMAGE)
+    else:
+        docker_image = pull_image(docker_client, TASK_WORKER_IMAGE)
 
     # mounts will be attached to host's fs, not this one
     host_mounts = query_host_mounts(docker_client, workdir)
